@@ -1,13 +1,65 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { StatusBar } from 'expo-status-bar'; 
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
+import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign } from '@expo/vector-icons'; 
 import Ellipse1 from '../assets/Ellipse1.png';
 import Ellipse2 from '../assets/Ellipse2.png';
+import { useIsFocused } from '@react-navigation/native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../firebase';
 
 export default function GetStarted({ navigation }) {
+    const isFocused = useIsFocused();
+
+    useEffect(()=>{
+        if(isFocused){
+            let tempUsers = []
+            let tempProducts = []
+            db.collection('users').get().then((snapshot)=>{
+                snapshot.docs.map((doc)=>{
+                    let tempUser = doc.data()
+                    tempUser['id'] = doc.id
+                    tempUsers.push(tempUser);
+                })
+                storeData(tempUsers, 'listOfUsers');
+            })  
+            
+            db.collection('products').get().then((querySnapshot) => {
+                querySnapshot.forEach((doc, index)=>{
+                    let tempProduct = doc.data();
+                    tempProduct['id'] = doc.id
+                    tempProducts.push(tempProduct)
+                })
+                storeData(tempProducts, 'listOfProducts');
+            })
+            
+            const storeData = async (value, key) => {
+                try {
+                const jsonValue = JSON.stringify(value)
+                await AsyncStorage.setItem(key, jsonValue)
+                } catch (e) {
+                // saving error
+                }
+            }
+            const getData = async (key) => {
+                try {
+                const jsonValue = await AsyncStorage.getItem(key)
+                return jsonValue != null ? JSON.parse(jsonValue) : null;
+                } catch(e) {
+                // error reading value
+                }
+            }
+            getData('currentUser').then((data)=>{
+                if(data){
+                    navigation.navigate('MyTabs', {currentUser:data});
+                }
+            });
+        }
+    },[isFocused])
+
     return (
         <LinearGradient colors={['#303145', '#28364C']} style={styles.container}>
             <StatusBar style="auto" /> 

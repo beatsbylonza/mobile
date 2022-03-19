@@ -7,10 +7,10 @@ import { AntDesign } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import CheckBox from 'expo-checkbox';
 
-import Ellipse6 from '../assets/Ellipse6.png';
-import Ellipse7 from '../assets/Ellipse7.png';
-import Ellipse8 from '../assets/Ellipse8.png';
-import { auth, db } from '../firebase';
+import Ellipse6 from '../../assets/Ellipse6.png';
+import Ellipse7 from '../../assets/Ellipse7.png';
+import Ellipse8 from '../../assets/Ellipse8.png';
+import { auth, db } from '../../firebase';
 
 export default function CreateAccount({ navigation, route }) {
     const { user } = route.params;

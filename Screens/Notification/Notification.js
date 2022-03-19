@@ -3,11 +3,10 @@ import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react
 import { StatusBar } from 'expo-status-bar'; 
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
-import { Feather } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { NetworkContext } from './NetworkContext';
+import { NetworkContext } from '../NetworkContext';
 
-import notif from '../assets/notif.png';
+import notif from '../../assets/notif.png';
 
 export default function Notification() {
     const currentUser = React.useContext(NetworkContext);

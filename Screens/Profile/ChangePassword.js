@@ -8,10 +8,10 @@ import { AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 
-import logo from '../assets/logo.png';
-import Ellipse3 from '../assets/Ellipse3.png';
-import Ellipse4 from '../assets/Ellipse4.png';
-import Ellipse5 from '../assets/Ellipse5.png';
+import logo from '../../assets/logo.png';
+import Ellipse3 from '../../assets/Ellipse3.png';
+import Ellipse4 from '../../assets//Ellipse4.png';
+import Ellipse5 from '../../assets/Ellipse5.png';
 
 export default function ChangePassword() {
     const [modalVisible, setModalVisible] = useState(false);

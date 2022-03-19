@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { Feather, FontAwesome5, AntDesign } from '@expo/vector-icons';
 
-import { db } from '../firebase';
+import { db } from '../../firebase';
 
 export default function Home({ navigation, route }) {
     const { product } = route.params;

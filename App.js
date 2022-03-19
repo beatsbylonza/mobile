@@ -6,14 +6,14 @@ import AppLoading from 'expo-app-loading';
 
 import GetStarted from './Screens/GetStarted';
 import Login from './Screens/Login';
-import CreateAccount from './Screens/CreateAccount';
+import CreateAccount from './Screens/SignUp/CreateAccount';
 import MyTabs from './Screens/BottomTabNavigator';
-import VerifyEmail from './Screens/VerifyEmail';
+import VerifyEmail from './Screens/SignUp/VerifyEmail';
 
-import PersonalInformation from './Screens/PersonalInformation';
-import ChangePassword2 from './Screens/ChangePassword2';
+import PersonalInformation from './Screens/Profile/PersonalInformation';
+import ChangePassword2 from './Screens/Profile/ChangePassword2';
 
-import Product from './Screens/Product';
+import Product from './Screens/Home/Product';
 
 const Stack = createNativeStackNavigator();
 

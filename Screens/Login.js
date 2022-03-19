@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, ImageBackground, Modal, DatePickerIOSBase} from 'react-native';
+import React, { useState, useEffect } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, ImageBackground, Modal, Alert} from 'react-native';
 import { StatusBar } from 'expo-status-bar'; 
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
+import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { AntDesign } from '@expo/vector-icons'; 
@@ -12,25 +12,57 @@ import logo from '../assets/logo.png';
 import Ellipse3 from '../assets/Ellipse3.png';
 import Ellipse4 from '../assets/Ellipse4.png';
 import Ellipse5 from '../assets/Ellipse5.png';
-import { db } from '../firebase';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [eye, setEye] = useState(false);
+    const [users, setUsers] = useState([]);
+
+    useEffect(()=>{
+        const getData = async (key) => {
+            try {
+            const jsonValue = await AsyncStorage.getItem(key)
+            return jsonValue != null ? JSON.parse(jsonValue) : null;
+            } catch(e) {
+            // error reading value
+            }
+        }
+        getData('listOfUsers').then((data)=>{
+            setUsers(data)});
+    },[])
+
+    const storeData = async (value, key) => {
+        try {
+          const jsonValue = JSON.stringify(value)
+          await AsyncStorage.setItem(key, jsonValue)
+        } catch (e) {
+          // saving error
+        }
+    }
 
     const signIn = () => {
-        db.collection('users').get().then((snapshot)=>{
-            snapshot.docs.map((doc)=>{
-                if(doc.data().email === email && doc.data().password === password){
+        if(email !== '' && password !== ''){
+            let userFound = false;
+            users.map((user)=>{
+                if(user.email === email && user.password === password){
+                    userFound = true;
                     setEmail('');
                     setPassword('');
-                    let newCurrentUser = {currentUser:doc.data(), id:doc.id}
+                    let newCurrentUser = {currentUser:user, id:user.id}
+                    storeData(user, 'currentUser')
                     navigation.navigate('MyTabs', {currentUser:newCurrentUser});
                 }
             })
-        })
+            if(!userFound){
+                Alert.alert('No user Found', 'Invalid email or password', [
+                    { text: 'OK' },
+                  ]);
+            }
+        }
     }
 
     return (

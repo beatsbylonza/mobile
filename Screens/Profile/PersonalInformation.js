@@ -4,28 +4,52 @@ import { StatusBar } from 'expo-status-bar';
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Feather } from '@expo/vector-icons';
 
-import { db } from '../firebase';
+import { db } from '../../firebase';
 
 export default function Profile({ navigation, route }) {
     const { currentUser } = route.params;
     
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [reEnterPassword, setReEnterPassword] = useState('');
+    const [firstName, setFirstName] = useState(currentUser.name.firstName);
+    const [middleName, setMiddleName] = useState(currentUser.name.middleName);
+    const [lastName, setLastName] = useState(currentUser.name.lastName);
 
-    const [eye1, setEye1] = useState(false);
-    const [eye2, setEye2] = useState(false);
-    const [eye3, setEye3] = useState(false);
+    const [email, setEmail] = useState(currentUser.email);
+    
+    const [contactNumber, setContactNumber] = useState(currentUser.contactNumber);
+
+    const [street, setStreet] = useState(currentUser.address.street);
+    const [city, setCity] = useState(currentUser.address.city);
+    const [state, setState] = useState(currentUser.address.state);
+    const [zipCode, setZipCode] = useState(currentUser.address.zipCode);
+
+    const storeData = async (value, key) => {
+        try {
+          const jsonValue = JSON.stringify(value)
+          await AsyncStorage.setItem(key, jsonValue)
+        } catch (e) {
+          // saving error
+        }
+    }
 
     const saveChanges = () =>{
-        if(currentPassword === currentUser.currentUser.password && newPassword === reEnterPassword && newPassword !== currentPassword){
-            db.collection('users').doc(currentUser.id).update({
-                password:newPassword
-            }).then(()=>{
+        if(firstName && middleName && lastName && email && street && city && state && zipCode){
+            currentUser.name.firstName = firstName;
+            currentUser.name.middleName = middleName;
+            currentUser.name.lastName = lastName;
+            currentUser.email = email;
+            currentUser.contactNumber = contactNumber;
+            currentUser.address.street = street;
+            currentUser.address.city = city;
+            currentUser.address.state = state;
+            currentUser.address.zipCode = zipCode;
+
+            storeData(currentUser, 'currentUser');
+            
+
+            db.collection('users').doc(currentUser.id).update(currentUser).then(()=>{
                 Alert.alert(
-                    "Change Password",
+                    "Personal Information",
                     "Successfully Updated",
                     [
                       {
@@ -65,59 +89,39 @@ export default function Profile({ navigation, route }) {
             <MaterialIcons style={styles.arrow} name="arrow-back" size={RFPercentage(3)} color="white" />
         </TouchableOpacity>
         
-        <Text style={styles.mainText}>Change Password</Text>
-
+        <Text style={styles.mainText}>Personal Information</Text>
         <View style={styles.mainView}>
-            <Text style={styles.title}>Current Password</Text>
+            <Text style={styles.title}>Full Name</Text>
             <View style={styles.textInputView}>
-                <TextInput secureTextEntry={!eye1} style={styles.textInput} onChangeText={setCurrentPassword}/>
-                {
-                    eye1 ?
-                    <TouchableOpacity onPress={()=>setEye1(false)}>
-                        <Feather style={styles.eye} name="eye" size={RFPercentage(2.5)} color="#28364C" />
-                    </TouchableOpacity>
-                    :
-                    <TouchableOpacity onPress={()=>setEye1(true)}>
-                        <Feather style={styles.eye} name="eye-off" size={RFPercentage(2.5)} color="#28364C" />
-                    </TouchableOpacity>
-                }
+                <TextInput style={styles.textInput} placeholder='First Name' value={firstName} onChangeText={setFirstName}/>
+                <TextInput style={styles.textInput} placeholder='Middle Name' value={middleName} onChangeText={setMiddleName}/>
+                <TextInput style={styles.textInput} placeholder='Last Name' value={lastName} onChangeText={setLastName}/>
             </View>
         </View>
 
         <View style={styles.mainView}>
-            <Text style={styles.title}>New Password</Text>
+            <Text style={styles.title}>Email</Text>
             <View style={styles.textInputView}>
-                <TextInput secureTextEntry={!eye2} style={styles.textInput} onChangeText={setNewPassword}/>
-                {
-                    eye2 ?
-                    <TouchableOpacity onPress={()=>setEye2(false)}>
-                        <Feather style={styles.eye} name="eye" size={RFPercentage(2.5)} color="#28364C" />
-                    </TouchableOpacity>
-                    :
-                    <TouchableOpacity onPress={()=>setEye2(true)}>
-                        <Feather style={styles.eye} name="eye-off" size={RFPercentage(2.5)} color="#28364C" />
-                    </TouchableOpacity>
-                }
+                <TextInput editable={false} style={styles.textInput} placeholder='Email' value={email} onChangeText={setEmail}/>
             </View>
         </View>
 
         <View style={styles.mainView}>
-            <Text style={styles.title}>Re-enter Password</Text>
+            <Text style={styles.title}>Contact Number</Text>
             <View style={styles.textInputView}>
-                <TextInput secureTextEntry={!eye3} style={styles.textInput} onChangeText={setReEnterPassword}/>
-                {
-                    eye3 ?
-                    <TouchableOpacity onPress={()=>setEye3(false)}>
-                        <Feather style={styles.eye} name="eye" size={RFPercentage(2.5)} color="#28364C" />
-                    </TouchableOpacity>
-                    :
-                    <TouchableOpacity onPress={()=>setEye3(true)}>
-                        <Feather style={styles.eye} name="eye-off" size={RFPercentage(2.5)} color="#28364C" />
-                    </TouchableOpacity>
-                }
+                <TextInput style={styles.textInput} placeholder='Contact Number' value={contactNumber} onChangeText={setContactNumber} keyboardType='number-pad'/>
             </View>
         </View>
 
+        <View style={styles.mainView}>
+            <Text style={styles.title}>Delivery Address</Text>
+            <View style={styles.textInputView}>
+                <TextInput style={styles.textInput} placeholder='Street' value={street} onChangeText={setStreet}/>
+                <TextInput style={styles.textInput} placeholder='City' value={city} onChangeText={setCity}/>
+                <TextInput style={styles.textInput} placeholder='State' value={state} onChangeText={setState}/>
+                <TextInput style={styles.textInput} placeholder='Zip Code' value={zipCode} onChangeText={setZipCode}/>
+            </View>
+        </View>
 
         <TouchableOpacity style={styles.button} onPress={saveChanges}>
             <Text style={styles.buttonText}>Save Changes</Text>
@@ -128,9 +132,6 @@ export default function Profile({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-    eye:{
-        marginRight:RFPercentage(.5)
-    },
     arrow:{
         marginBottom:RFPercentage(2)
     },
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
         justifyContent:'center',
         alignSelf:'center',
         borderRadius:RFPercentage(2),
-        marginTop:RFPercentage(5)
+        marginTop:RFPercentage(2)
     },
     buttonText:{
         fontFamily:'RobotoBold',
@@ -164,20 +165,16 @@ const styles = StyleSheet.create({
         fontSize:RFPercentage(2)
     },
     textInputView:{
-        flexDirection:'row',
-        alignItems:'center',
-        justifyContent:'center',
-        backgroundColor:'white',
-        borderRadius:RFPercentage(2)
+
+        borderColor:'red',
+        justifyContent:'space-between'
     },
     textInput:{
         backgroundColor:'white',
-        paddingHorizontal:RFPercentage(2),
+        paddingHorizontal:RFPercentage(3),
         marginVertical:RFPercentage(.75),
         borderRadius:RFPercentage(1),
-        height:RFPercentage(4.5),
-        width:RFPercentage(40),
-
+        height:RFPercentage(4.5)
     },
     container: {
         flex: 1,

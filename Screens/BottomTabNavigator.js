@@ -3,18 +3,16 @@ import { BackHandler } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { Ionicons, Fontisto } from '@expo/vector-icons';
-import { NetworkContext } from './NetworkContext';
 
-import Home from './Home';
-import Notification from './Notification';
-import Music from './Music';
-import Favorite from './Favorite';
-import Profile from './Profile';
+import Home from './Home/Home';
+import Notification from './Notification/Notification';
+import Music from './Music/Music';
+import Favorite from './Favorite/Favorite';
+import Profile from './Profile/Profile';
 
 const Tab = createMaterialBottomTabNavigator();
 
 export default function MyTabs({ navigation, route }) {
-  const { currentUser } = route.params;
 
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', ()=>true);
@@ -22,7 +20,6 @@ export default function MyTabs({ navigation, route }) {
   },[]);
   
   return (
-    <NetworkContext.Provider value={currentUser}>
       <Tab.Navigator
         initialRouteName="Home"
         activeColor="#FFFFFF"
@@ -102,6 +99,5 @@ export default function MyTabs({ navigation, route }) {
           }}
         />
       </Tab.Navigator>
-    </NetworkContext.Provider>
   );
 }

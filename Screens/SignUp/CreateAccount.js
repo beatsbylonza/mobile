@@ -4,15 +4,15 @@ import CheckBox from 'expo-checkbox';
 import { StatusBar } from 'expo-status-bar'; 
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
-import { auth } from '../firebase';
+import { auth } from '../../firebase';
 
 import { AntDesign } from '@expo/vector-icons'; 
 import { FontAwesome5 } from '@expo/vector-icons';
 
-import logo from '../assets/logo.png';
-import Ellipse6 from '../assets/Ellipse6.png';
-import Ellipse7 from '../assets/Ellipse7.png';
-import Ellipse8 from '../assets/Ellipse8.png';
+import logo from '../../assets/logo.png';
+import Ellipse6 from '../../assets/Ellipse6.png';
+import Ellipse7 from '../../assets/Ellipse7.png';
+import Ellipse8 from '../../assets/Ellipse8.png';
 
 export default function CreateAccount({ navigation }) {
     const [terms, setTerms] = useState(false); 

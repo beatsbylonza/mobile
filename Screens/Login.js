@@ -32,6 +32,7 @@ export default function Login({ navigation }) {
             }
         }
         getData('listOfUsers').then((data)=>{
+            console.log(data)
             setUsers(data)});
     },[])
 

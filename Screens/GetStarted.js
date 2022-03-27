@@ -9,7 +9,8 @@ import Ellipse2 from '../assets/Ellipse2.png';
 import { useIsFocused } from '@react-navigation/native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { db } from '../firebase';
+// import { db } from '../firebase';
+import axios from 'axios';
 
 export default function GetStarted({ navigation }) {
     const isFocused = useIsFocused();
@@ -18,24 +19,40 @@ export default function GetStarted({ navigation }) {
         if(isFocused){
             let tempUsers = []
             let tempProducts = []
-            db.collection('users').get().then((snapshot)=>{
-                snapshot.docs.map((doc)=>{
-                    let tempUser = doc.data()
-                    tempUser['id'] = doc.id
-                    tempUsers.push(tempUser);
-                })
-                storeData(tempUsers, 'listOfUsers');
-            })  
+            // db.collection('users').get().then((snapshot)=>{
+            //     snapshot.docs.map((doc)=>{
+            //         let tempUser = doc.data()
+            //         tempUser['id'] = doc.id
+            //         tempUsers.push(tempUser);
+            //     })
+            //     storeData(tempUsers, 'listOfUsers');
+            // })  
             
-            db.collection('products').get().then((querySnapshot) => {
-                querySnapshot.forEach((doc, index)=>{
-                    let tempProduct = doc.data();
-                    tempProduct['id'] = doc.id
-                    tempProducts.push(tempProduct)
-                })
-                storeData(tempProducts, 'listOfProducts');
+            // db.collection('products').get().then((querySnapshot) => {
+            //     querySnapshot.forEach((doc, index)=>{
+            //         let tempProduct = doc.data();
+            //         tempProduct['id'] = doc.id
+            //         tempProducts.push(tempProduct)
+            //     })
+            //     storeData(tempProducts, 'listOfProducts');
+            // })
+
+            axios.get('http://192.168.1.3:3000/api/customers', {
+                headers: {
+                    Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MjNmMDY2MTZmOTgwMWY0ZjdlZDFiMmUiLCJmaXJzdE5hbWUiOiJBZG1pbiIsIm1pZGRsZU5hbWUiOiJBZG1pbiIsImxhc3ROYW1lIjoiQWRtaW4iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE2NDgzNjQ2NjksImV4cCI6MTY1MDk1NjY2OX0.B3XtuyHmBmbqR-UMf8E7uN4GOXUOfsMFp7Rmz_93JjA'
+                }
+            }).then((response)=>{
+                console.log(response.data.data[0].email)
             })
-            
+            // axios.post('https://beatsbylonza.herokuapp.com/api/login', {
+            //     "email": "admin@admin.com",
+            //     "password": "12345"
+            // }).then((reponse)=>{
+            //     console.log(reponse.data)
+            // })
+
+
+
             const storeData = async (value, key) => {
                 try {
                 const jsonValue = JSON.stringify(value)

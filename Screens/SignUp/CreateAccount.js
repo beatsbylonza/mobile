@@ -4,7 +4,7 @@ import CheckBox from 'expo-checkbox';
 import { StatusBar } from 'expo-status-bar'; 
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
-import { auth } from '../../firebase';
+
 
 import { AntDesign } from '@expo/vector-icons'; 
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -20,30 +20,8 @@ export default function CreateAccount({ navigation }) {
 
     const signUp = () => {
         if(terms){
-            auth.createUserWithEmailAndPassword(email, 'tempPass')
-            .then(userCredentials => {
-                verifyEmailFunction();
-                navigation.navigate('VerifyEmail', {user: userCredentials.user})
-            })  
-            .catch((error)=>{
-                if(error.message == "The email address is already in use by another account."){
-                    auth.signInWithEmailAndPassword(email, 'tempPass')
-                    .then(userCredentials => {
-                        verifyEmailFunction();
-                        navigation.navigate('VerifyEmail', {user: userCredentials.user})
-                    })
-                }
-            })
-            
+            navigation.navigate('VerifyEmail', {email: email})
         }
-    }
-
-    const verifyEmailFunction = () => {
-        auth.currentUser.sendEmailVerification().then(()=> {
-            console.log("Email Verification Sent")
-        }).catch((error)=>{
-            console.log(error.message)
-        })
     }
 
     return (

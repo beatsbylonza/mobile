@@ -7,7 +7,7 @@ import { Ionicons, Fontisto } from '@expo/vector-icons';
 import Home from './Home/Home';
 import Notification from './Notification/Notification';
 import Music from './Music/Music';
-import Favorite from './Favorite/Favorite';
+import Cart from './Cart/Cart';
 import Profile from './Profile/Profile';
 
 const Tab = createMaterialBottomTabNavigator();
@@ -73,14 +73,14 @@ export default function MyTabs({ navigation, route }) {
           }}
         />
         <Tab.Screen
-          name="Favorite"
-          component={Favorite}
+          name="Cart"
+          component={Cart}
           options={{
-            tabBarLabel: 'Favorite',
+            tabBarLabel: 'Cart',
             tabBarIcon: ({ focused }) => (
               focused ? 
-              <Ionicons name="heart-sharp" size={RFPercentage(2.75)} color="white" />:
-              <Ionicons name="heart-outline" size={RFPercentage(2.75)} color="white" />
+              <Ionicons name="cart" size={RFPercentage(2.75)} color="white" />:
+              <Ionicons name="cart-outline" size={RFPercentage(2.75)} color="white" />
             ),
             tabBarColor:'#935265'
           }}

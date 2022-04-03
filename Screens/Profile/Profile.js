@@ -5,6 +5,8 @@ import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, FontAwesome5, Ionicons, MaterialIcons, AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import jwt_decode from "jwt-decode";
+import { useIsFocused } from '@react-navigation/native';
 
 export default function Profile({ navigation }) {
     const [currentUser, setCurrentUser] = useState({});
@@ -20,21 +22,16 @@ export default function Profile({ navigation }) {
         }
     }
 
-    const storeData = async (value, key) => {
-        try {
-          const jsonValue = JSON.stringify(value)
-          await AsyncStorage.setItem(key, jsonValue)
-        } catch (e) {
-          // saving error
-        }
-    }
-
+    const isFocused = useIsFocused();
     useEffect(() => {
-        getData('currentUser').then((currentUser)=>{
-            setCurrentUser(currentUser)
-            setLoading(false)
-        })
-    },[]);
+        if(isFocused){
+            getData('currentUser').then((token)=>{
+                const decoded = jwt_decode(token);
+                setCurrentUser(decoded)
+                setLoading(false)
+            })
+        }
+    },[isFocused]);
 
     const clearAll = async () => {
         try {
@@ -42,7 +39,6 @@ export default function Profile({ navigation }) {
         } catch(e) {
           // clear error
         }
-      
         console.log('Done.')
       }
       
@@ -60,32 +56,29 @@ export default function Profile({ navigation }) {
                 
                 <View style={styles.header}>
                     <View style={styles.headerLeft}>
-                        {/* <TouchableOpacity>
-                            <Feather name="menu" size={RFPercentage(3)} color="#C2C2C2" />
-                        </TouchableOpacity> */}
                     </View>
                     <View style={styles.headerRight}>
-                        <TouchableOpacity>
+                        {/* <TouchableOpacity>
                             <FontAwesome5 name="shopping-bag" size={RFPercentage(3)} color="#C2C2C2"  style={{marginLeft:RFPercentage(3)}}/>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
                 </View>
     
                 <View style={styles.mainView}>
                     <ScrollView>
                         <View style={styles.profileView}>
-                            <Text style={styles.nameText}>{`${currentUser.name.firstName} ${currentUser.name.middleName[0]}. ${currentUser.name.lastName}`}</Text>
+                            <Text style={styles.nameText}>{`${currentUser.firstName} ${currentUser.middleName[0]}. ${currentUser.lastName}`}</Text>
                             <Text style={styles.emailText}>{currentUser.email}</Text>
                         </View>
                         <View style={styles.profileSettingsView}>
-                            <TouchableOpacity style={styles.profileSettingsSquare} onPress={()=>navigation.push('PersonalInformation', {currentUser:currentUser})}>
+                            <TouchableOpacity style={styles.profileSettingsSquare} onPress={()=>navigation.push('PersonalInformation')}>
                                 <View style={styles.profileSettingsLeft}>
                                     <Ionicons name="person-outline" size={RFPercentage(2.75)} color="#161616" />
                                     <Text style={styles.profileSettingsText}>Personal Information</Text>
                                 </View>
                                 <MaterialIcons name="arrow-forward-ios" size={RFPercentage(2.75)} color="#161616" />
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.profileSettingsSquare} onPress={()=>{navigation.navigate('ChangePassword', {currentUser:currentUser})}}>
+                            <TouchableOpacity style={styles.profileSettingsSquare} onPress={()=>{navigation.navigate('ChangePassword')}}>
                                 <View style={styles.profileSettingsLeft}>
                                     <Ionicons name="key-outline" size={RFPercentage(2.75)} color="#161616" />
                                     <Text style={styles.profileSettingsText}>Change Password</Text>

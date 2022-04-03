@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, TextInput, BackHandler} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, TextInput, BackHandler, ScrollView} from 'react-native';
 import { StatusBar } from 'expo-status-bar'; 
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,12 +10,13 @@ import CheckBox from 'expo-checkbox';
 import Ellipse6 from '../../assets/Ellipse6.png';
 import Ellipse7 from '../../assets/Ellipse7.png';
 import Ellipse8 from '../../assets/Ellipse8.png';
-import { auth, db } from '../../firebase';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CreateAccount({ navigation, route }) {
-    const { user } = route.params;
-
     const [terms, setTerms] = useState(false); 
+    const [userName, setUserName] = useState('');
+    const [contactNumber, setContactNumber] = useState('');
     const [firstName, setFirstName] = useState('');
     const [middleName, setMiddleName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -27,16 +28,13 @@ export default function CreateAccount({ navigation, route }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [eye1, setEye1] = useState(false);
     const [eye2, setEye2] = useState(false);
-    const [verified, setVerified] = useState(false);
+    const [verified, setVerified] = useState(true);
     const [page, setPage] = useState(true);
+
+    const { email } = route.params;
 
     useEffect(() => {
         BackHandler.addEventListener('hardwareBackPress', backAction);
-        auth.onAuthStateChanged(user => {
-            if(user.emailVerified){
-                setVerified(true)
-            }
-        })
         return () => BackHandler.removeEventListener('hardwareBackPress', false);
     },[]);
 
@@ -53,41 +51,57 @@ export default function CreateAccount({ navigation, route }) {
         })
     }
 
+    const storeData = async (value, key) => {
+        try {
+        const jsonValue = JSON.stringify(value)
+        await AsyncStorage.setItem(key, jsonValue)
+        } catch (e) {
+        // saving error
+        }
+    }
+    const getData = async (key) => {
+        try {
+        const jsonValue = await AsyncStorage.getItem(key)
+        return jsonValue != null ? JSON.parse(jsonValue) : null;
+        } catch(e) {
+        // error reading value
+        }
+    }
+
     const signUp = () => {
-
-        if(firstName && middleName && lastName && street && city && state && zipCode && password === confirmPassword && terms && password.length > 6){
-            db.collection('users').add({
-                name:{
-                    firstName:firstName,
-                    middleName:middleName,
-                    lastName:lastName
-                },
-                email:user.email,
-                password:password,
-                address:{
-                    street:street,
-                    city:city,
-                    state:state,
-                    zipCode:zipCode
-                },
-                contactNumber:'',
-                notification:{
-
-                },
-                favorite:[],
-                cart:{},
-                toShip:{},
-                toReceive:{},
-                history:{},
+        if(password === confirmPassword && terms && password.length > 5 && terms){
+            axios.post('http://192.168.1.3:3000/api/register', {
+                "email" : email,
+                "username" : userName,
+                "password" : password,
+                "firstName" : firstName,
+                "middleName" : middleName,
+                "lastName" : lastName,
+                "contactNumber" : contactNumber,
+                "address" : {
+                    "city" : city,
+                    "state" : state,
+                    "street" : street,
+                    "zipcode" : zipCode
+                }
+            }).then((response)=>{
+                const { token } = response.data;
+                storeData(token, 'currentUser');
+                navigation.navigate('MyTabs');
+            }, (error)=>{
+                const { message } = error.response.data;
+                Alert.alert('Registration Failed', message, [
+                    { text: 'OK' },
+                ]);
             })
         }
-        
     }
 
     return (
+        <ScrollView>
         <LinearGradient colors={['#303145', '#28364C']} style={styles.container}>
             <StatusBar style="auto" /> 
-
+           
             <ImageBackground source={Ellipse6} resizeMode="cover" style={styles.ellipse6} />
             <ImageBackground source={Ellipse7} resizeMode="cover" style={styles.ellipse7} />
             <ImageBackground source={Ellipse8} resizeMode="cover" style={styles.ellipse8} />
@@ -105,6 +119,11 @@ export default function CreateAccount({ navigation, route }) {
                             <View style={styles.textView}>
                                 <Text style={styles.mainText}>Tell us about yourself</Text>
                                 <Text style={styles.subText}>Only provide information that is true and correct.</Text>
+                            </View>
+
+                            <View style={styles.nameView}>
+                                <TextInput style={styles.textInput} placeholder={'Username'} placeholderTextColor={'#D6D5CB'} fontSize={RFPercentage(1.75)} fontFamily={'RobotoBold'} onChangeText={setUserName} />
+                                <TextInput style={styles.textInput} placeholder={'Contact Number'} placeholderTextColor={'#D6D5CB'} fontSize={RFPercentage(1.75)} fontFamily={'RobotoBold'} onChangeText={setContactNumber} />
                             </View>
 
                             <View style={styles.nameView}>
@@ -200,8 +219,9 @@ export default function CreateAccount({ navigation, route }) {
                     </View>
                 </>
             }
-
+           
         </LinearGradient>
+        </ScrollView>
     );
 }
 

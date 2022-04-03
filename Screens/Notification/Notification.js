@@ -22,9 +22,9 @@ export default function Notification() {
                     </TouchableOpacity> */}
                 </View>
                 <View style={styles.headerRight}>
-                    <TouchableOpacity>
+                    {/* <TouchableOpacity>
                         <FontAwesome5 name="shopping-bag" size={RFPercentage(3)} color="#C2C2C2"  style={{marginLeft:RFPercentage(3)}}/>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </View>
             

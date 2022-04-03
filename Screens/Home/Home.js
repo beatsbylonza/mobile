@@ -5,6 +5,8 @@ import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { LinearGradient } from 'expo-linear-gradient';
 import Carousel from 'react-native-snap-carousel';
 import { useIsFocused } from '@react-navigation/native';
+import jwt_decode from "jwt-decode";
+import axios from 'axios';
 
 import { Feather, FontAwesome5, AntDesign } from '@expo/vector-icons';
 
@@ -21,30 +23,29 @@ export default function Home({ navigation }) {
 
     const [products, setProducts] = useState([]);
     const [currentUser, setCurrentUser] = useState({});
-    const [favorite, setFavorite] = useState([]);
 
     const [loading, setLoading] = useState(true);
     const isFocused = useIsFocused();
     
     useEffect(() => {
         if(isFocused){
-            getData('currentUser').then((currentUser)=>{
-                setCurrentUser(currentUser)
-                let tempFavorite = []
-                currentUser.favorite.map((data)=>{
-                    tempFavorite.push(data)
-                })
-                setFavorite(tempFavorite)
+            getData('currentUser').then((currentUserToken)=>{
+                var decoded = jwt_decode(currentUserToken);
+                setCurrentUser(decoded)
             })
-            getData('listOfProducts').then((products)=>{
-                setProducts(products)
-                setLoading(false)
+            axios.get('http://192.168.1.3:3000/api/products/', {
+                headers: {
+                    Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MjNjNzgzZTcyMmFiMTU0YzMzZmYxZmEiLCJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImZpcnN0TmFtZSI6IkFkbWluIiwibWlkZGxlTmFtZSI6Ik1pZGRsZSBOYW1lIiwibGFzdE5hbWUiOiJVc2VyIiwiaWF0IjoxNjQ4ODgwNTAxLCJleHAiOjE2NTE0NzI1MDF9.q90a35yOII7_6NjNj-TcOlT9ULO3_nb2KsJnTaTeIJU'
+                }
+            }).then((response)=>{
+                const { data } = response.data;
+                setProducts(data);
+                setLoading(false);
+            }).catch((err)=>{
+                console.log("PRODUCTS: ", err.message)
             })
-        }else{
-            currentUser.favorite = favorite;
-            storeData(currentUser, 'currentUser');
         }
-    },[isFocused]);
+    }, []);
 
 
     const _renderItem = (image) => {
@@ -63,29 +64,6 @@ export default function Home({ navigation }) {
         }
     }
 
-    const storeData = async (value, key) => {
-        try {
-          const jsonValue = JSON.stringify(value)
-          await AsyncStorage.setItem(key, jsonValue)
-        } catch (e) {
-          // saving error
-        }
-    }
-
-    const removeFavorite = (id) => {
-        var fav = favorite;
-        var index = favorite.indexOf(id);
-        fav.splice(index, 1);
-        setFavorite([...fav]);
-    }
-
-    const addFavorite = (id) => {
-        let fav = favorite
-        fav.push(id);
-        setFavorite([...fav]);
-    }
-
-
     if(!loading){
         return (
             <LinearGradient colors={['#303145', '#28364C']} style={styles.container}>
@@ -93,17 +71,14 @@ export default function Home({ navigation }) {
                 <ScrollView>
                 <View style={styles.header}>
                     <View style={styles.headerLeft}>
-                        {/* <TouchableOpacity>
-                            <Feather name="menu" size={RFPercentage(3)} color="#C2C2C2" />
-                        </TouchableOpacity> */}
                     </View>
                     <View style={styles.headerRight}>
                         <TouchableOpacity>
                             <Feather name="search" size={RFPercentage(3)} color="#C2C2C2" />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        {/* <TouchableOpacity>
                             <FontAwesome5 name="shopping-bag" size={RFPercentage(3)} color="#C2C2C2"  style={{marginLeft:RFPercentage(3)}}/>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
                 </View>
     
@@ -124,64 +99,18 @@ export default function Home({ navigation }) {
                     </View>
                 </View>
     
-                {/* <View style={styles.mainView}>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>New Arrivals</Text>
-                        <TouchableOpacity>
-                            <Feather name="arrow-right" size={RFPercentage(3)} color="#FFFFFF" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-    
-                <View style={styles.mainView}>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>Men's</Text>
-                        <TouchableOpacity>
-                            <Feather name="arrow-right" size={RFPercentage(3)} color="#FFFFFF" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-    
-                <View style={styles.mainView}>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>Women's</Text>
-                        <TouchableOpacity>
-                            <Feather name="arrow-right" size={RFPercentage(3)} color="#FFFFFF" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-    
-                <View style={styles.mainView}>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>Kid's</Text>
-                        <TouchableOpacity>
-                            <Feather name="arrow-right" size={RFPercentage(3)} color="#FFFFFF" />
-                        </TouchableOpacity>
-                    </View>
-                </View> */}
-    
                 <View style={styles.productView}>
                     <View style={styles.productViewLeft}>
                         {
                             products.map((product, id) => {
                                 if(id % 2 === 0 && product.category !== 'music'){
                                     return (
-                                        <TouchableOpacity key={id} onPress={()=>navigation.navigate('Product', {product:product, favorite:favorite, currentUser:currentUser})}>
-                                            <ImageBackground style={styles.productImageView} resizeMode='cover' source={{uri:product.picture}}/>
+                                        <TouchableOpacity key={id} onPress={()=>navigation.navigate('Product', {product:product})}>
+                                            <ImageBackground style={styles.productImageView} resizeMode='cover' source={{uri:product.imageUrl}}/>
                                             <View style={styles.productInfoView}>
                                                 <Text style={styles.productNameText}>{product.name}</Text>
-                                                <Text style={styles.productPriceText}>${product.price}</Text>
+                                                <Text style={styles.productPriceText}>${product.price.value.$numberDecimal}</Text>
                                             </View>
-                                           {
-                                                favorite.indexOf(product.id) !== -1 ?
-                                                <TouchableOpacity style={styles.favoriteView} onPress={()=>removeFavorite(product.id)}>
-                                                    <AntDesign style={styles.favorite} name="heart" size={RFPercentage(1.5)} color="#FF7171" />
-                                                </TouchableOpacity>
-                                               : 
-                                                <TouchableOpacity style={styles.favoriteView} onPress={()=>addFavorite(product.id)}>
-                                                    <AntDesign style={styles.favorite} name="hearto" size={RFPercentage(1.5)} color="#FF7171" />
-                                                </TouchableOpacity>
-                                           }
                                         </TouchableOpacity>
                                     )
                                 }
@@ -193,22 +122,12 @@ export default function Home({ navigation }) {
                             products.map((product, id) => {
                                 if(id % 2 !== 0 && product.category !== 'music'){
                                     return (
-                                        <TouchableOpacity key={id} onPress={()=>navigation.navigate('Product', {product:product, favorite:favorite, currentUser:currentUser})}>
-                                            <ImageBackground style={styles.productImageView} resizeMode='cover' source={{uri:product.picture}}/>
+                                        <TouchableOpacity key={id} onPress={()=>navigation.navigate('Product', {product:product})}>
+                                            <ImageBackground style={styles.productImageView} resizeMode='cover' source={{uri:product.imageUrl}}/>
                                             <View style={styles.productInfoView}>
                                                 <Text style={styles.productNameText}>{product.name}</Text>
-                                                <Text style={styles.productPriceText}>${product.price}</Text>
+                                                <Text style={styles.productPriceText}>${product.price.value.$numberDecimal}</Text>
                                             </View>
-                                            {
-                                                favorite.indexOf(product.id) !== -1 ?
-                                                <TouchableOpacity style={styles.favoriteView} onPress={()=>removeFavorite(product.id)}>
-                                                    <AntDesign style={styles.favorite} name="heart" size={RFPercentage(1.5)} color="#FF7171" />
-                                                </TouchableOpacity>
-                                               : 
-                                               <TouchableOpacity style={styles.favoriteView} onPress={()=>addFavorite(product.id)}>
-                                                    <AntDesign style={styles.favorite} name="hearto" size={RFPercentage(1.5)} color="#FF7171" />
-                                                </TouchableOpacity>
-                                           }
                                         </TouchableOpacity>
                                     )
                                 }

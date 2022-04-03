@@ -14,6 +14,8 @@ import Ellipse4 from '../assets/Ellipse4.png';
 import Ellipse5 from '../assets/Ellipse5.png';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import jwt_decode from "jwt-decode";
 
 export default function Login({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
@@ -32,7 +34,6 @@ export default function Login({ navigation }) {
             }
         }
         getData('listOfUsers').then((data)=>{
-            console.log(data)
             setUsers(data)});
     },[])
 
@@ -46,24 +47,21 @@ export default function Login({ navigation }) {
     }
 
     const signIn = () => {
-        if(email !== '' && password !== ''){
-            let userFound = false;
-            users.map((user)=>{
-                if(user.email === email && user.password === password){
-                    userFound = true;
-                    setEmail('');
-                    setPassword('');
-                    let newCurrentUser = {currentUser:user, id:user.id}
-                    storeData(user, 'currentUser')
-                    navigation.navigate('MyTabs', {currentUser:newCurrentUser});
-                }
-            })
-            if(!userFound){
-                Alert.alert('No user Found', 'Invalid email or password', [
-                    { text: 'OK' },
-                  ]);
-            }
-        }
+        axios.post('http://192.168.1.3:3000/api/login', {
+            "email": email,
+            "password": password
+        }).then((response)=>{
+            const { token } = response.data;
+            setEmail('');
+            setPassword('');
+            storeData(token, 'currentUser')
+            navigation.navigate('MyTabs');
+        }, (error)=>{
+            const { message } = error.response.data;
+            Alert.alert('Login Failed', message, [
+                { text: 'OK' },
+            ]);
+        })
     }
 
     return (
